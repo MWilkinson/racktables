@@ -1225,7 +1225,28 @@ function renderObject ($object_id)
 	echo "<tr><td colspan=2 align=center><h1>${info['dname']}</h1></td></tr>\n";
 	// left column with uknown number of portlets
 	echo "<tr><td class=pcleft>";
+	renderObjectSummaryPortlet ($info);
+	renderObjectCommentPortlet ($info);
+	renderObjectLogPortlet ($info);
+	renderObjectFilesPortlet ($info);
+	renderObjectPortsPortlet ($info);
+	renderObjectIPAddressPortlet ($info);
+	renderObjectNat4Portlet ($info);
 
+	renderSLBTriplets2 ($info);
+	renderSLBTriplets ($info);
+
+	echo "</td>\n";
+
+	// After left column we have (surprise!) right column with rackspace portlet only.
+	echo "<td class=pcright>";
+	renderObjectRackspacePortlet($info);
+	echo "</td></tr>";
+	echo "</table>\n";
+}
+
+function renderObjectSummaryPortlet ($info)
+{
 	// display summary portlet
 	$summary  = array();
 	if (strlen ($info['name']))
@@ -1282,14 +1303,20 @@ function renderObject ($object_id)
 		)."&"
 	));
 	renderEntitySummary ($info, 'Summary', $summary);
+}
 
+function renderObjectCommentPortlet ($info)
+{
 	if (strlen ($info['comment']))
 	{
 		startPortlet ('Comment');
 		echo '<div class=commentblock>' . string_insert_hrefs ($info['comment']) . '</div>';
 		finishPortlet ();
 	}
+}
 
+function renderObjectLogPortlet ($info)
+{
 	$logrecords = getLogRecordsForObject ($_REQUEST['object_id']);
 	if (count ($logrecords))
 	{
@@ -1307,12 +1334,18 @@ function renderObject ($object_id)
 		echo '</table>';
 		finishPortlet();
 	}
+}
 
-	switchportInfoJS ($object_id); // load JS code to make portnames interactive
-	renderFilesPortlet ('object', $object_id);
+function renderObjectFilesPortlet ($info)
+{
+	renderFilesPortlet ('object', $info['id']);
+}
 
+function renderObjectPortsPortlet ($info)
+{
 	if (count ($info['ports']))
 	{
+		switchportInfoJS ($info['id']); // load JS code to make portnames interactive
 		startPortlet ('Ports and links');
 		$hl_port_id = 0;
 		if (isset ($_REQUEST['hl_port_id']))
@@ -1334,7 +1367,10 @@ function renderObject ($object_id)
 		echo "</table><br>";
 		finishPortlet();
 	}
+}
 
+function renderObjectIPAddressPortlet ($info)
+{
 	if (count ($info['ipv4']) + count ($info['ipv6']))
 	{
 		startPortlet ('IP addresses');
@@ -1380,7 +1416,10 @@ function renderObject ($object_id)
 		echo "</table><br>\n";
 		finishPortlet();
 	}
+}
 
+function renderObjectNat4Portlet ($info)
+{
 	$forwards = $info['nat4'];
 	if (count($forwards['in']) or count($forwards['out']))
 	{
@@ -1434,13 +1473,10 @@ function renderObject ($object_id)
 		}
 		finishPortlet();
 	}
+}
 
-	renderSLBTriplets2 ($info);
-	renderSLBTriplets ($info);
-	echo "</td>\n";
-
-	// After left column we have (surprise!) right column with rackspace portlet only.
-	echo "<td class=pcright>";
+function renderObjectRackspacePortlet ($info)
+{
 	if (!in_array($info['objtype_id'], $virtual_obj_types))
 	{
 		// rackspace portlet
@@ -1450,8 +1486,6 @@ function renderObject ($object_id)
 		echo '<br>';
 		finishPortlet();
 	}
-	echo "</td></tr>";
-	echo "</table>\n";
 }
 
 function renderRackMultiSelect ($sname, $racks, $selected)
