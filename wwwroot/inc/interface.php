@@ -1264,7 +1264,7 @@ function renderObjectSummaryPortlet ($info)
 		$summary['Asset tag'] = $info['asset_no'];
 	elseif (considerConfiguredConstraint ($info, 'ASSETWARN_LISTSRC'))
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>');
-	$parents = getEntityRelatives ('parents', 'object', $object_id);
+	$parents = getEntityRelatives ('parents', 'object', $info['id']);
 	if (count ($parents))
 	{
 		$fmt_parents = array();
@@ -1272,7 +1272,7 @@ function renderObjectSummaryPortlet ($info)
 			$fmt_parents[] =  "<a href='".makeHref(array('page'=>$parent['page'], $parent['id_name'] => $parent['entity_id']))."'>${parent['name']}</a>";
 		$summary[count($parents) > 1 ? 'Containers' : 'Container'] = implode ('<br>', $fmt_parents);
 	}
-	$children = getEntityRelatives ('children', 'object', $object_id);
+	$children = getEntityRelatives ('children', 'object', $info['id']);
 	if (count ($children))
 	{
 		$fmt_children = array();
@@ -1282,7 +1282,7 @@ function renderObjectSummaryPortlet ($info)
 	}
 	if ($info['has_problems'] == 'yes')
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
-	foreach (getAttrValues ($object_id) as $record)
+	foreach (getAttrValues ($info['id']) as $record)
 		if
 		(
 			strlen ($record['value']) and
@@ -1317,7 +1317,7 @@ function renderObjectCommentPortlet ($info)
 
 function renderObjectLogPortlet ($info)
 {
-	$logrecords = getLogRecordsForObject ($_REQUEST['object_id']);
+	$logrecords = getLogRecordsForObject ($info['id']);
 	if (count ($logrecords))
 	{
 		startPortlet ('log records');
@@ -1354,7 +1354,7 @@ function renderObjectPortsPortlet ($info)
 			$hl_port_id = $_REQUEST['hl_port_id'];
 			addAutoScrollScript ("port-$hl_port_id");
 		}
-		echo getPopupLink ('traceroute', array ('object_id' => $object_id), 'findlink', 'find', 'Trace all port links');
+		echo getPopupLink ('traceroute', array ('object_id' => $info['id']), 'findlink', 'find', 'Trace all port links');
 		echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>";
 		echo '<tr><th class=tdleft>Local name</th><th class=tdleft>Visible label</th>';
 		echo '<th class=tdleft>Interface</th><th class=tdleft>L2 address</th>';
@@ -1481,8 +1481,8 @@ function renderObjectRackspacePortlet ($info)
 	{
 		// rackspace portlet
 		startPortlet ('rackspace allocation');
-		foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
-			renderRack ($rack_id, $object_id);
+		foreach (getResidentRacksData ($info['id'], FALSE) as $rack_id)
+			renderRack ($rack_id, $info['id']);
 		echo '<br>';
 		finishPortlet();
 	}
