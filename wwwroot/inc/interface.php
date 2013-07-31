@@ -154,6 +154,34 @@ foreach ($indexlayout as $row)
 <?php
 }
 
+function renderLayout ($page, $tab, $data = NULL)
+{
+	global $layout;
+	
+	// Main layout starts.
+	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
+	foreach (array('top','left','center','right','bottom') as $side)
+	{
+		if ($side != 'right' && $side != 'center')
+			echo "<tr>";
+		if ($side == 'top' || $side == 'bottom')
+			echo "<td colspan=3 align=center>";
+		else
+			echo "<td class=pc$side>";
+		echo "<!-- $page : $tab : $side -->";
+		foreach ($layout[$page][$tab][$side] as $idx => $portlet)
+		{
+			echo "<!-- ${portlet['callback']} -->\n";
+			call_user_func($portlet['callback'], $data);
+		}
+		if ($side == 'left' || $side == 'center')
+			echo "</td>";
+		else
+			echo "</td></tr>\n";
+	}
+	echo "</table>\n";
+}
+
 function getRenderedAlloc ($object_id, $alloc)
 {
 	$ret = array
@@ -1221,28 +1249,12 @@ function renderObject ($object_id)
 	$info = spotEntity ('object', $object_id);
 	amplifyCell ($info);
 	// Main layout starts.
-	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
-	echo "<tr><td colspan=2 align=center><h1>${info['dname']}</h1></td></tr>\n";
-	// left column with uknown number of portlets
-	echo "<tr><td class=pcleft>";
-	renderObjectSummaryPortlet ($info);
-	renderObjectCommentPortlet ($info);
-	renderObjectLogPortlet ($info);
-	renderObjectFilesPortlet ($info);
-	renderObjectPortsPortlet ($info);
-	renderObjectIPAddressPortlet ($info);
-	renderObjectNat4Portlet ($info);
+	renderLayout('object','default',$info);
+}
 
-	renderSLBTriplets2 ($info);
-	renderSLBTriplets ($info);
-
-	echo "</td>\n";
-
-	// After left column we have (surprise!) right column with rackspace portlet only.
-	echo "<td class=pcright>";
-	renderObjectRackspacePortlet($info);
-	echo "</td></tr>";
-	echo "</table>\n";
+function renderObjectTitle ($info)
+{
+	echo "<h1>${info['dname']}</h1>";
 }
 
 function renderObjectSummaryPortlet ($info)

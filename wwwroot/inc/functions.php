@@ -6105,4 +6105,45 @@ function validTagName ($s, $allow_autotag = FALSE)
 	return FALSE;
 }
 
+function registerLayout ($page, $tab, $col='left', $name, $callback, $method='after', $name2 = '')
+{
+	global $layout;
+	
+	if ( ! array_key_exists($page, $layout) )
+		throw new RacktablesError ("unknown layout page - '$page'", RackTablesError::MISCONFIGURED);
+	if ( ! array_key_exists($tab, $layout[$page]) )
+		throw new RacktablesError ("unknown layout tab for page '$page' - '$tab'", RackTablesError::MISCONFIGURED);
+	if ( ! array_key_exists($col, $layout[$page][$tab]) )
+	{
+		$layout[$page][$tab][$col][] = array( 'name' => $name, 'callback' => $callback);
+		return;
+	}	
+	if ($name2 == '')
+			if ($method == 'before')
+				array_unshift( $layout[$page][$tab][$col], array( 'name' => $name, 'callback' => $callback));
+			elseif ($method == 'after')
+				array_push( $layout[$page][$tab][$col], array( 'name' => $name, 'callback' => $callback));
+			else
+				throw new RacktablesError ("unknown layout injection method '$method'", RackTablesError::INTERNAL);
+	else
+		$done = 0;
+		foreach ( $layout[$page][$tab][$col] as $idx => $portlet)
+			if ($portlet['name'] == $name2)
+			{
+				if ($method == 'before')
+				{
+					array_splice($layout[$page][$tab][$col], $idx, 0, array( array('name'=> $name, 'callback' => $callback)));
+					$done = 1;
+				}
+				elseif ($method == 'after')
+				{
+					array_splice($layout[$page][$tab][$col], ($idx+1), 0, array( array('name'=> $name, 'callback' => $callback)));
+					$done = 1;
+				}
+				else
+					throw new RacktablesError ("Unknown layout placement method ($method)", RackTablesError::MISCONFIGURED);
+				break;
+			}
+}
+
 ?>

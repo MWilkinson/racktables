@@ -88,6 +88,11 @@ td.pcleft {
 	text-align: center;
 }
 
+td.pccenter {
+	vertical-align: top;
+	text-align: center;
+}
+
 td.pcright {
 	vertical-align: top;
 	text-align: center;
